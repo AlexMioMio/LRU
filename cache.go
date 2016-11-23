@@ -6,30 +6,30 @@ import (
 
 const shardsCount = 32
 
-type Cache []*cacheShard
+type LRU []*cacheShard
 
-func NewCache(size uint) Cache{
+func NewLRUCache(size int) *LRU{
 	if size < shardsCount {
 		size = shardsCount
 	}
-	cache := make(Cache,shardsCount)
+	cache := make(LRU,shardsCount)
 	for i := 0 ; i < size ; i++ {
 		cache[i] = &cacheShard{
 			size: size/shardsCount,
 			mp: make(map[uint]interface{}),
 		}
 	}
-	return cache
+	return &cache
 }
 
-func (c Cache) getShard(index uint) *cacheShard{
+func (c LRU) getShard(index uint) *cacheShard{
 	return c[index%(uint(shardsCount))]
 }
 
-func (c Cache) Get(index uint) (obj interface{},found bool){
+func (c LRU) Get(index uint) (obj interface{},found bool){
 	return c.getShard(index).get(index)
 }
-func (c Cache) Add(index uint,obj interface{})bool {
+func (c LRU) Add(index uint,obj interface{})bool {
 	return c.getShard(index).add(index,obj)
 }
 type cacheShard struct {
