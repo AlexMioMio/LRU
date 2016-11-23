@@ -1,6 +1,8 @@
 package LRU
 
-import "container/list"
+import (
+	"container/list"
+)
 type Key interface {}
 
 type Cache struct{
@@ -11,6 +13,9 @@ type Cache struct{
 }
 
 func NewCache(size int) *Cache {
+	if size < 0 {
+		return nil
+	}
 	return &Cache{
 		list: list.New(),
 		cache: make(map[Key]*list.Element),
@@ -23,7 +28,7 @@ type Entry struct {
 	value interface{}
 }
 
-func (c *Cache) Add(key Key,value interface{}){
+func (c *Cache) AddItem(key Key,value interface{}){
 	if c.cache == nil {
 		c.list = list.New()
 		c.cache = make(map[Key]*list.Element)
@@ -50,6 +55,17 @@ func (c *Cache) Remove(key Key){
 		delete(c.cache,key)
 	}
 }
+
+func (c *Cache) GetElem(key Key)(interface{},bool){
+	if c.cache == nil {
+		return nil,false
+	}
+	if elem,ok := c.cache[key] ; ok {
+		return elem.Value.(*Entry).value,true
+	}
+	return nil,false
+}
+
 func (c *Cache) RemoveElem(elem *list.Element){
 	if elem == nil {
 		return
